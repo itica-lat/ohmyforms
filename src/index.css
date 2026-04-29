@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0f2854;
+  --color-blue: #1c4d8d;
+  --color-mid: #4988c4;
+  --color-sky: #bde8f5;
+  --color-rule: rgba(73, 136, 196, 0.2);
+
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+  --font-serif: "DM Serif Display", serif;
+
+  --radius-input: 6px;
+  --radius-card: 10px;
+  --radius-tag: 4px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-navy);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.label-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-mid);
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+/* Decorative tick-mark rule */
+.tick-rule {
+  height: 10px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(73, 136, 196, 0.22) 0,
+    rgba(73, 136, 196, 0.22) 1px,
+    transparent 1px,
+    transparent 18px
+  );
+}
+
+.tick-rule-sm {
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(73, 136, 196, 0.15) 0,
+    rgba(73, 136, 196, 0.15) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+}
