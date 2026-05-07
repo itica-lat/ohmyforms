@@ -4,6 +4,7 @@ import type { FormSchema } from '../../types/form'
 import { getVisibleFields } from '../../lib/conditionalEngine'
 import { FieldRenderer } from './FieldRenderer'
 import { useResponseStore } from '../../store/responseStore'
+import { useT } from '../../lib/i18n'
 
 interface FormEmbedProps {
   form: FormSchema
@@ -12,6 +13,7 @@ interface FormEmbedProps {
 }
 
 export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
+  const t = useT()
   const submit = useResponseStore((s) => s.submit)
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -40,7 +42,7 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
         (Array.isArray(val) && val.length === 0)
 
       if (isEmpty) {
-        newErrors[field.id] = 'Required'
+        newErrors[field.id] = t('form_embed.required_error')
       }
     }
 
@@ -73,7 +75,7 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
           <CheckCircle size={24} style={{ color: form.accentColor }} />
         </div>
         <h2 className="text-xl font-medium text-navy tracking-tight">
-          {form.successMessage || 'Thank you. Your response has been recorded.'}
+          {form.successMessage || t('form_embed.success_default')}
         </h2>
       </div>
     )
@@ -86,7 +88,7 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
           {/* Decorative section label */}
           <div className="flex items-center gap-3">
             <div className="h-px w-6 bg-rule" />
-            <span className="label-meta text-navy/30">Form</span>
+            <span className="label-meta text-navy/30">{t('form_embed.form_label')}</span>
           </div>
 
           <div>
@@ -129,7 +131,7 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
             className="mt-8 px-6 py-2.5 rounded-input text-sm font-normal text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: form.accentColor }}
           >
-            {form.submitLabel || 'Submit'}
+            {form.submitLabel || t('form_embed.submit')}
           </button>
         )}
 
@@ -140,10 +142,10 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
               className="px-6 py-2.5 rounded-input text-sm font-normal text-white opacity-70 cursor-default"
               style={{ backgroundColor: form.accentColor }}
             >
-              {form.submitLabel || 'Submit'}
+              {form.submitLabel || t('form_embed.submit')}
             </button>
             <p className="mt-2 text-[11px] text-mid/60 font-mono uppercase tracking-widest">
-              Preview mode — submission disabled
+              {t('form_embed.preview_mode')}
             </p>
           </div>
         )}

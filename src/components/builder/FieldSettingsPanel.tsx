@@ -3,6 +3,7 @@ import type { Condition, ConditionOperator, FieldDefinition } from '../../types/
 import { Input, Textarea } from '../ui/Input'
 import { Toggle } from '../ui/Toggle'
 import { Button } from '../ui/Button'
+import { useT } from '../../lib/i18n'
 
 interface FieldSettingsPanelProps {
   field: FieldDefinition
@@ -11,12 +12,12 @@ interface FieldSettingsPanelProps {
   onClose: () => void
 }
 
-const OPERATORS: { value: ConditionOperator; label: string }[] = [
-  { value: 'equals', label: 'equals' },
-  { value: 'not_equals', label: 'does not equal' },
-  { value: 'contains', label: 'contains' },
-  { value: 'is_empty', label: 'is empty' },
-  { value: 'is_not_empty', label: 'is not empty' },
+const OPERATOR_KEYS: { value: ConditionOperator; labelKey: string }[] = [
+  { value: 'equals', labelKey: 'field_settings.op.equals' },
+  { value: 'not_equals', labelKey: 'field_settings.op.not_equals' },
+  { value: 'contains', labelKey: 'field_settings.op.contains' },
+  { value: 'is_empty', labelKey: 'field_settings.op.is_empty' },
+  { value: 'is_not_empty', labelKey: 'field_settings.op.is_not_empty' },
 ]
 
 function ConditionRow({
@@ -30,12 +31,13 @@ function ConditionRow({
   onChange: (c: Condition) => void
   onRemove: () => void
 }) {
+  const t = useT()
   const needsValue = !['is_empty', 'is_not_empty'].includes(condition.if.operator)
 
   return (
     <div className="flex flex-col gap-2 p-3 rounded-input border border-[rgba(73,136,196,0.15)] bg-sky/20">
       <div className="flex items-center gap-2">
-        <span className="text-[11px] label-meta">If</span>
+        <span className="text-[11px] label-meta">{t('field_settings.if')}</span>
         <select
           value={condition.if.fieldId}
           onChange={(e) =>
@@ -43,7 +45,7 @@ function ConditionRow({
           }
           className="flex-1 text-[12px] border border-[rgba(73,136,196,0.25)] rounded-tag px-2 py-1 bg-white text-navy"
         >
-          <option value="">Select field</option>
+          <option value="">{t('field_settings.select_field')}</option>
           {fields.map((f) => (
             <option key={f.id} value={f.id}>
               {f.label}
@@ -68,9 +70,9 @@ function ConditionRow({
         }
         className="text-[12px] border border-[rgba(73,136,196,0.25)] rounded-tag px-2 py-1 bg-white text-navy"
       >
-        {OPERATORS.map((op) => (
+        {OPERATOR_KEYS.map((op) => (
           <option key={op.value} value={op.value}>
-            {op.label}
+            {t(op.labelKey as any)}
           </option>
         ))}
       </select>
@@ -81,12 +83,12 @@ function ConditionRow({
           onChange={(e) =>
             onChange({ ...condition, if: { ...condition.if, value: e.target.value } })
           }
-          placeholder="Value"
+          placeholder={t('field_settings.value')}
           className="text-[12px] border border-[rgba(73,136,196,0.25)] rounded-tag px-2 py-1 bg-white text-navy"
         />
       )}
       <div className="flex items-center gap-2">
-        <span className="text-[11px] label-meta">Then</span>
+        <span className="text-[11px] label-meta">{t('field_settings.then')}</span>
         <select
           value={condition.action}
           onChange={(e) =>
@@ -94,8 +96,8 @@ function ConditionRow({
           }
           className="text-[12px] border border-[rgba(73,136,196,0.25)] rounded-tag px-2 py-1 bg-white text-navy"
         >
-          <option value="show">Show this field</option>
-          <option value="hide">Hide this field</option>
+          <option value="show">{t('field_settings.show_field')}</option>
+          <option value="hide">{t('field_settings.hide_field')}</option>
         </select>
       </div>
     </div>
@@ -108,6 +110,7 @@ export function FieldSettingsPanel({
   onChange,
   onClose,
 }: FieldSettingsPanelProps) {
+  const t = useT()
   const isLayout = field.type === 'section_divider' || field.type === 'statement'
   const isSelect = field.type === 'single_select' || field.type === 'multi_select'
   const otherFields = allFields.filter((f) => f.id !== field.id)
@@ -153,7 +156,7 @@ export function FieldSettingsPanel({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(73,136,196,0.15)]">
-        <p className="label-meta">Field settings</p>
+        <p className="label-meta">{t('field_settings.title')}</p>
         <button type="button" onClick={onClose} className="text-mid hover:text-navy">
           <X size={15} />
         </button>
@@ -161,14 +164,14 @@ export function FieldSettingsPanel({
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
         <Input
-          label="Label"
+          label={t('field_settings.label')}
           value={field.label}
           onChange={(e) => onChange({ label: e.target.value })}
         />
 
         {field.type === 'statement' && (
           <Textarea
-            label="Content"
+            label={t('field_settings.content')}
             value={field.content ?? ''}
             rows={4}
             onChange={(e) => onChange({ content: e.target.value })}
@@ -177,9 +180,9 @@ export function FieldSettingsPanel({
 
         {field.type === 'section_divider' && (
           <Input
-            label="Title (optional)"
+            label={t('field_settings.title_optional')}
             value={field.content ?? ''}
-            placeholder="Section title"
+            placeholder={t('field_settings.section_title')}
             onChange={(e) => onChange({ content: e.target.value })}
           />
         )}
@@ -187,13 +190,13 @@ export function FieldSettingsPanel({
         {!isLayout && (
           <>
             <Input
-              label="Placeholder"
+              label={t('field_settings.placeholder')}
               value={field.placeholder ?? ''}
               onChange={(e) => onChange({ placeholder: e.target.value })}
             />
 
             <Input
-              label="Help text"
+              label={t('field_settings.help_text')}
               value={field.helpText ?? ''}
               onChange={(e) => onChange({ helpText: e.target.value })}
             />
@@ -201,24 +204,24 @@ export function FieldSettingsPanel({
             <Toggle
               checked={field.required ?? false}
               onChange={(v) => onChange({ required: v })}
-              label="Required"
+              label={t('field_settings.required')}
             />
           </>
         )}
 
         {field.type === 'file_upload' && (
           <Input
-            label="Accepted file types"
+            label={t('field_settings.accepted_types')}
             value={field.acceptTypes ?? ''}
             placeholder=".pdf,.docx,image/*"
-            hint="Comma-separated MIME types or extensions"
+            hint={t('field_settings.accepted_types_hint')}
             onChange={(e) => onChange({ acceptTypes: e.target.value })}
           />
         )}
 
         {isSelect && (
           <div className="flex flex-col gap-2">
-            <p className="label-meta">Options</p>
+            <p className="label-meta">{t('field_settings.options')}</p>
             {(field.options ?? []).map((opt, i) => (
               <div key={i} className="flex items-center gap-2">
                 <input
@@ -238,13 +241,13 @@ export function FieldSettingsPanel({
             ))}
             <Button size="sm" variant="ghost" onClick={addOption} className="self-start">
               <Plus size={13} />
-              Add option
+              {t('field_settings.add_option')}
             </Button>
           </div>
         )}
 
         <div className="flex flex-col gap-2 pt-2 border-t border-[rgba(73,136,196,0.15)]">
-          <p className="label-meta">Conditional logic</p>
+          <p className="label-meta">{t('field_settings.conditional_logic')}</p>
           {(field.conditions ?? []).map((c, i) => (
             <ConditionRow
               key={i}
@@ -257,10 +260,10 @@ export function FieldSettingsPanel({
           {otherFields.length > 0 ? (
             <Button size="sm" variant="ghost" onClick={addCondition} className="self-start">
               <Plus size={13} />
-              Add condition
+              {t('field_settings.add_condition')}
             </Button>
           ) : (
-            <p className="text-[11px] text-mid/70">Add more fields to create conditions.</p>
+            <p className="text-[11px] text-mid/70">{t('field_settings.condition_hint')}</p>
           )}
         </div>
       </div>

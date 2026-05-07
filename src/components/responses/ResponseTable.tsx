@@ -4,6 +4,7 @@ import type { FormSchema, FormResponse } from '../../types/form'
 import { FIELD_TYPE_META } from '../../types/form'
 import { formatDate, download, toCSV } from '../../lib/utils'
 import { Button } from '../ui/Button'
+import { useT } from '../../lib/i18n'
 
 interface ResponseTableProps {
   form: FormSchema
@@ -13,6 +14,7 @@ interface ResponseTableProps {
 }
 
 export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTableProps) {
+  const t = useT()
   const [search, setSearch] = useState('')
   const [sortAsc, setSortAsc] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -35,9 +37,9 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
     })
 
   function exportCSV() {
-    const headers = ['Submitted at', ...dataFields.map((f) => f.label)]
+    const headers = [t('response_table.submitted_at'), ...dataFields.map((f) => f.label)]
     const rows = responses.map((r) => ({
-      'Submitted at': r.submittedAt,
+      [t('response_table.submitted_at')]: r.submittedAt,
       ...Object.fromEntries(
         dataFields.map((f) => {
           const val = r.data[f.id]
@@ -53,9 +55,9 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
   if (responses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-20 text-center">
-        <p className="text-navy/40 font-light text-sm">No responses yet</p>
+        <p className="text-navy/40 font-light text-sm">{t('response_table.empty_title')}</p>
         <p className="text-mid/40 text-xs font-mono uppercase tracking-widest">
-          Share the form link to start collecting
+          {t('response_table.empty_desc')}
         </p>
       </div>
     )
@@ -71,23 +73,23 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search responses"
+              placeholder={t('response_table.search')}
               className="flex-1 text-sm text-navy placeholder:text-mid/50 bg-transparent focus:outline-none"
             />
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
             <span className="label-meta text-navy/40">
-              {filtered.length} of {responses.length}
+              {t('response_table.of').replace('{filtered}', String(filtered.length)).replace('{total}', String(responses.length))}
             </span>
             <Button size="sm" variant="secondary" onClick={exportCSV}>
               <Download size={13} />
-              Export CSV
+              {t('response_table.export_csv')}
             </Button>
             {responses.length > 0 && (
               <Button size="sm" variant="danger" onClick={onClear}>
                 <Trash2 size={13} />
-                Clear all
+                {t('response_table.clear_all')}
               </Button>
             )}
           </div>
@@ -101,7 +103,7 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
                   className="px-6 py-3 text-left label-meta text-navy/50 cursor-pointer hover:text-navy whitespace-nowrap"
                   onClick={() => setSortAsc(!sortAsc)}
                 >
-                  Submitted {sortAsc ? '↑' : '↓'}
+                  {t('response_table.submitted')} {sortAsc ? '↑' : '↓'}
                 </th>
                 {dataFields.slice(0, 5).map((f) => (
                   <th key={f.id} className="px-4 py-3 text-left label-meta text-navy/50 whitespace-nowrap">
@@ -129,7 +131,7 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
                     const display = Array.isArray(val) ? val.join(', ') : String(val ?? '')
                     return (
                       <td key={f.id} className="px-4 py-3 text-navy font-light max-w-[180px]">
-                        <span className="block truncate">{display || '—'}</span>
+                        <span className="block truncate">{display || t('response_table.placeholder')}</span>
                       </td>
                     )
                   })}
@@ -178,17 +180,18 @@ function ResponseDetail({
   onClose: () => void
   onDelete: () => void
 }) {
+  const t = useT()
   return (
     <div className="w-80 border-l border-[rgba(73,136,196,0.15)] flex flex-col shrink-0">
       <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(73,136,196,0.15)]">
-        <p className="label-meta">Response detail</p>
+        <p className="label-meta">{t('response_table.detail_title')}</p>
         <button type="button" onClick={onClose} className="text-mid hover:text-navy text-sm">
           ✕
         </button>
       </div>
       <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
         <div>
-          <p className="label-meta mb-1">Submitted</p>
+          <p className="label-meta mb-1">{t('response_table.submitted_label')}</p>
           <p className="text-sm text-navy font-light">{formatDate(response.submittedAt)}</p>
         </div>
         {dataFields.map((f) => {
@@ -205,7 +208,7 @@ function ResponseDetail({
           return (
             <div key={f.id}>
               <p className="label-meta mb-1">{f.label}</p>
-              <p className="text-sm text-navy font-light break-words">{display || '—'}</p>
+              <p className="text-sm text-navy font-light break-words">{display || t('response_table.placeholder')}</p>
             </div>
           )
         })}
@@ -213,7 +216,7 @@ function ResponseDetail({
       <div className="p-5 border-t border-[rgba(73,136,196,0.15)]">
         <Button size="sm" variant="danger" onClick={onDelete} className="w-full justify-center">
           <Trash2 size={13} />
-          Delete response
+          {t('response_table.delete_response')}
         </Button>
       </div>
     </div>

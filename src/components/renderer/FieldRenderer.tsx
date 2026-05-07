@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import type { FieldDefinition } from '../../types/form'
+import { useT } from '../../lib/i18n'
 
 interface FieldRendererProps {
   field: FieldDefinition
@@ -19,6 +20,7 @@ export function FieldRenderer({
   accentColor = '#1C4D8D',
   error,
 }: FieldRendererProps) {
+  const t = useT()
   const str = value == null ? '' : String(value)
 
   const labelEl = (
@@ -104,7 +106,7 @@ export function FieldRenderer({
         <input
           type="email"
           value={str}
-          placeholder={field.placeholder ?? 'you@example.com'}
+          placeholder={field.placeholder ?? t('field_renderer.email_placeholder')}
           onChange={(e) => onChange(e.target.value)}
           className={[inputBase, error ? 'border-red-400' : ''].join(' ')}
         />
@@ -271,7 +273,7 @@ export function FieldRenderer({
           ].join(' ')}
         >
           <span className="text-[#4988c4] text-sm font-light">
-            {value ? String(value) : 'Click to upload or drag a file'}
+            {value ? String(value) : t('field_renderer.upload_hint')}
           </span>
           {field.acceptTypes && (
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#4988c4]/60">
@@ -322,6 +324,7 @@ function SignatureField({
   accentColor: string
   error?: string
 }) {
+  const t = useT()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawing = useRef(false)
   const [isEmpty, setIsEmpty] = useState(!value)
@@ -430,7 +433,7 @@ function SignatureField({
         />
         <div className="flex items-center justify-between px-3 py-1.5 bg-white border-t border-[rgba(73,136,196,0.1)]">
           <span className="font-mono text-[10px] uppercase tracking-widest text-[#4988c4]/60">
-            {isEmpty ? 'Draw your signature above' : 'Signature captured'}
+            {isEmpty ? t('field_renderer.signature_draw') : t('field_renderer.signature_captured')}
           </span>
           {!isEmpty && (
             <button
@@ -438,7 +441,7 @@ function SignatureField({
               onClick={clear}
               className="text-[11px] text-[#4988c4] hover:text-[#0f2854] transition-colors"
             >
-              Clear
+              {t('field_renderer.clear')}
             </button>
           )}
         </div>

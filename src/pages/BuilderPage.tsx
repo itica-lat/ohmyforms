@@ -23,12 +23,16 @@ import { FormSettingsPanel } from '../components/builder/FormSettingsPanel'
 import { FormEmbed } from '../components/renderer/FormEmbed'
 import { ResponseTable } from '../components/responses/ResponseTable'
 import { Button } from '../components/ui/Button'
+import { useT, useI18nStore } from '../lib/i18n'
 
 type Tab = 'build' | 'preview' | 'responses' | 'share'
 type RightPanel = 'field' | 'form' | null
 
 export function BuilderPage() {
+  const t = useT()
   const { formId } = useParams<{ formId: string }>()
+  const locale = useI18nStore((s) => s.locale)
+  const setLocale = useI18nStore((s) => s.setLocale)
 
   const form = useFormStore((s) => s.getForm(formId ?? ''))
   const updateForm = useFormStore((s) => s.updateForm)
@@ -70,9 +74,9 @@ export function BuilderPage() {
   if (!form) {
     return (
       <div className="flex flex-col items-center justify-center h-svh text-navy/40">
-        <p>Form not found.</p>
+        <p>{t('builder.not_found')}</p>
         <Link to="/" className="text-blue text-sm mt-2 hover:underline">
-          Back to home
+          {t('builder.back_home')}
         </Link>
       </div>
     )
@@ -110,10 +114,10 @@ export function BuilderPage() {
   }
 
   const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'build', label: 'Build', icon: null },
-    { id: 'preview', label: 'Preview', icon: <Eye size={13} /> },
-    { id: 'responses', label: `Responses (${responses.length})`, icon: <BarChart2 size={13} /> },
-    { id: 'share', label: 'Share', icon: <Share2 size={13} /> },
+    { id: 'build', label: t('builder.tab.build'), icon: null },
+    { id: 'preview', label: t('builder.tab.preview'), icon: <Eye size={13} /> },
+    { id: 'responses', label: t('builder.tab.responses').replace('{count}', String(responses.length)), icon: <BarChart2 size={13} /> },
+    { id: 'share', label: t('builder.tab.share'), icon: <Share2 size={13} /> },
   ]
 
   return (
@@ -129,7 +133,7 @@ export function BuilderPage() {
           value={form.title}
           onChange={(e) => updateForm(form.id, { title: e.target.value })}
           className="font-normal text-navy text-sm bg-transparent border-none focus:outline-none min-w-0 flex-1 max-w-65"
-          placeholder="Untitled form"
+          placeholder={t('builder.untitled')}
         />
 
         <nav className="flex items-center gap-0.5 ml-4">
@@ -160,15 +164,23 @@ export function BuilderPage() {
             }
           >
             <Settings size={13} />
-            Form settings
+            {t('builder.form_settings')}
           </Button>
           <Button
             size="sm"
             variant="primary"
             onClick={() => window.open(`/form/${form.id}`, '_blank')}
           >
-            Open form
+            {t('builder.open_form')}
           </Button>
+          {/* Language toggle */}
+          <button
+            type="button"
+            onClick={() => setLocale(locale === 'en' ? 'es' : 'en')}
+            className="ml-2 px-2 py-1 rounded-input text-xs label-meta text-mid hover:text-navy hover:bg-sky/30 border border-rule transition-colors"
+          >
+            {locale === 'en' ? 'ES' : 'EN'}
+          </button>
         </div>
       </header>
 
@@ -178,7 +190,7 @@ export function BuilderPage() {
         {tab === 'build' && (
           <aside className="w-52 border-r border-rule overflow-y-auto shrink-0 bg-white flex flex-col">
             <div className="px-4 pt-4 pb-3 border-b border-rule flex flex-col gap-2">
-              <p className="label-meta text-navy/40">Add field</p>
+              <p className="label-meta text-navy/40">{t('builder.add_field_label')}</p>
               <div className="tick-rule-sm w-full" />
             </div>
             <FieldTypePicker onAdd={handleAddField} />
@@ -194,10 +206,10 @@ export function BuilderPage() {
                   <div className="tick-rule w-full" />
                   <div className="flex flex-col gap-2">
                     <p className="font-serif italic text-xl text-navy/30">
-                      Start with a field.
+                      {t('builder.empty_title')}
                     </p>
                     <p className="text-xs text-mid/50 font-light">
-                      Pick a type from the sidebar to add your first field.
+                      {t('builder.empty_desc')}
                     </p>
                   </div>
                   <div className="tick-rule w-full" />
@@ -286,6 +298,7 @@ export function BuilderPage() {
 }
 
 function SharePanel({ formId }: { formId: string }) {
+  const t = useT()
   const publicUrl = `${window.location.origin}/form/${formId}`
   const embedCode = `<iframe src="${window.location.origin}/embed/${formId}" width="100%" height="600" frameborder="0"></iframe>`
   const [copied, setCopied] = useState<string | null>(null)
@@ -299,14 +312,14 @@ function SharePanel({ formId }: { formId: string }) {
   return (
     <div className="max-w-lg flex flex-col gap-8">
       <div>
-        <h2 className="text-lg font-medium text-navy tracking-tight mb-1">Share</h2>
+        <h2 className="text-lg font-medium text-navy tracking-tight mb-1">{t('builder.share.title')}</h2>
         <p className="text-sm text-navy/50 font-light">
-          Distribute this form via a public link or embed it on any website.
+          {t('builder.share.desc')}
         </p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="label-meta">Public link</p>
+        <p className="label-meta">{t('builder.share.public_link')}</p>
         <div className="flex items-center gap-2 p-3 rounded-input border border-rule bg-sky/10">
           <a
             href={publicUrl}
@@ -321,13 +334,13 @@ function SharePanel({ formId }: { formId: string }) {
             onClick={() => copy(publicUrl, 'link')}
             className="shrink-0 text-xs label-meta text-mid hover:text-navy transition-colors"
           >
-            {copied === 'link' ? 'Copied!' : 'Copy'}
+            {copied === 'link' ? t('builder.share.copied') : t('builder.share.copy')}
           </button>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="label-meta">Embed code</p>
+        <p className="label-meta">{t('builder.share.embed_code')}</p>
         <div className="flex flex-col gap-2 p-3 rounded-input border border-rule bg-sky/10">
           <pre className="text-[11px] font-mono text-navy/70 whitespace-pre-wrap break-all leading-relaxed">
             {embedCode}
@@ -337,7 +350,7 @@ function SharePanel({ formId }: { formId: string }) {
             onClick={() => copy(embedCode, 'embed')}
             className="self-start text-xs label-meta text-mid hover:text-navy transition-colors"
           >
-            {copied === 'embed' ? 'Copied!' : 'Copy'}
+            {copied === 'embed' ? t('builder.share.copied') : t('builder.share.copy')}
           </button>
         </div>
       </div>

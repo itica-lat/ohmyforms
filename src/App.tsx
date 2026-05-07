@@ -4,8 +4,10 @@ import { BuilderPage } from './pages/BuilderPage'
 import { PublicFormPage } from './pages/PublicFormPage'
 import { EmbedPage } from './pages/EmbedPage'
 import { ResponsesPage } from './pages/ResponsesPage'
+import { useT } from './lib/i18n'
 
 export default function App() {
+  const t = useT()
   return (
     <BrowserRouter>
       <Routes>
@@ -18,7 +20,7 @@ export default function App() {
           path="*"
           element={
             <div className="flex items-center justify-center h-svh text-navy/40 font-light">
-              404 — Page not found
+              {t('app.404')}
             </div>
           }
         />

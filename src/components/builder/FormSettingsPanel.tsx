@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import type { FormSchema } from '../../types/form'
 import { Input, Textarea } from '../ui/Input'
+import { useT } from '../../lib/i18n'
 
 interface FormSettingsPanelProps {
   form: FormSchema
@@ -9,10 +10,11 @@ interface FormSettingsPanelProps {
 }
 
 export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanelProps) {
+  const t = useT()
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(73,136,196,0.15)]">
-        <p className="label-meta">Form settings</p>
+        <p className="label-meta">{t('form_settings.title')}</p>
         <button type="button" onClick={onClose} className="text-mid hover:text-navy">
           <X size={15} />
         </button>
@@ -20,43 +22,43 @@ export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanel
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
         <Input
-          label="Title"
+          label={t('form_settings.form_title')}
           value={form.title}
           onChange={(e) => onChange({ title: e.target.value })}
         />
 
         <Textarea
-          label="Description"
+          label={t('form_settings.description')}
           value={form.description ?? ''}
           rows={3}
-          placeholder="Describe the purpose of this form"
+          placeholder={t('form_settings.desc_placeholder')}
           onChange={(e) => onChange({ description: e.target.value })}
         />
 
         <Input
-          label="Submit button label"
+          label={t('form_settings.submit_label')}
           value={form.submitLabel}
           onChange={(e) => onChange({ submitLabel: e.target.value })}
         />
 
         <Textarea
-          label="Success message"
+          label={t('form_settings.success_message')}
           value={form.successMessage ?? ''}
           rows={2}
-          placeholder="Thank you. Your response has been recorded."
+          placeholder={t('form_settings.success_placeholder')}
           onChange={(e) => onChange({ successMessage: e.target.value })}
         />
 
         <Input
-          label="Redirect URL (optional)"
+          label={t('form_settings.redirect_url')}
           value={form.redirectUrl ?? ''}
-          placeholder="https://example.com/thank-you"
-          hint="If set, the user is redirected here after submission."
+          placeholder={t('form_settings.redirect_placeholder')}
+          hint={t('form_settings.redirect_hint')}
           onChange={(e) => onChange({ redirectUrl: e.target.value })}
         />
 
         <div className="flex flex-col gap-1">
-          <p className="label-meta">Accent color</p>
+          <p className="label-meta">{t('form_settings.accent_color')}</p>
           <div className="flex items-center gap-2">
             <input
               type="color"

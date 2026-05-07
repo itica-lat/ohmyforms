@@ -4,8 +4,10 @@ import { ChevronLeft } from 'lucide-react'
 import { useFormStore } from '../store/formStore'
 import { useResponseStore } from '../store/responseStore'
 import { ResponseTable } from '../components/responses/ResponseTable'
+import { useT } from '../lib/i18n'
 
 export function ResponsesPage() {
+  const t = useT()
   const { formId } = useParams<{ formId: string }>()
   const form = useFormStore((s) => s.getForm(formId ?? ''))
   const allResponses = useResponseStore((s) => s.responses)
@@ -22,9 +24,9 @@ export function ResponsesPage() {
   if (!form) {
     return (
       <div className="flex flex-col items-center justify-center min-h-svh gap-2">
-        <p className="text-navy/40 font-light">Form not found</p>
+        <p className="text-navy/40 font-light">{t('responses.not_found')}</p>
         <Link to="/" className="text-blue text-sm hover:underline">
-          Go home
+          {t('responses.go_home')}
         </Link>
       </div>
     )
@@ -37,12 +39,12 @@ export function ResponsesPage() {
           <ChevronLeft size={16} />
         </Link>
         <span className="font-normal text-navy text-sm">{form.title}</span>
-        <span className="label-meta text-mid/50 ml-1">/ Responses</span>
+        <span className="label-meta text-mid/50 ml-1">{t('responses.breadcrumb')}</span>
         <Link
           to={`/builder/${form.id}`}
           className="ml-auto text-sm text-mid hover:text-navy transition-colors font-light"
         >
-          Edit form
+          {t('responses.edit_form')}
         </Link>
       </header>
 

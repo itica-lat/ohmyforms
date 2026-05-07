@@ -3,6 +3,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { FieldDefinition } from '../../types/form'
 import { FIELD_TYPE_META } from '../../types/form'
+import { useT } from '../../lib/i18n'
 
 interface FieldCardProps {
   field: FieldDefinition
@@ -19,6 +20,7 @@ export function FieldCard({
   onDuplicate,
   onDelete,
 }: FieldCardProps) {
+  const t = useT()
   const {
     attributes,
     listeners,
@@ -63,7 +65,7 @@ export function FieldCard({
             <span className="label-meta text-navy/50 shrink-0">{field.content}</span>
           )}
           {!field.content && (
-            <span className="label-meta text-navy/30 shrink-0">Section divider</span>
+            <span className="label-meta text-navy/30 shrink-0">{t('field_card.section_divider')}</span>
           )}
           <div className="h-px flex-1 bg-rule" />
         </div>
@@ -108,7 +110,7 @@ export function FieldCard({
         <div className="flex items-center gap-2">
           <span className="label-meta text-navy/40">{meta.label}</span>
           {field.conditions && field.conditions.length > 0 && (
-            <span className="label-meta text-mid/60">· conditional</span>
+            <span className="label-meta text-mid/60">· {t('field_card.conditional')}</span>
           )}
         </div>
       </div>

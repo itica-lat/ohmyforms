@@ -14,6 +14,7 @@ import {
   Plus,
 } from 'lucide-react'
 import type { FieldType } from '../../types/form'
+import { useT } from '../../lib/i18n'
 
 interface FieldTypePickerProps {
   onAdd: (type: FieldType) => void
@@ -34,35 +35,36 @@ const FIELD_ICONS: Record<FieldType, React.ReactNode> = {
   statement: <FileText size={14} />,
 }
 
-const CATEGORIES: { label: string; fields: FieldType[] }[] = [
-  { label: 'Text', fields: ['short_text', 'long_text', 'email', 'number'] },
-  { label: 'Date & Time', fields: ['date', 'datetime'] },
-  { label: 'Choice', fields: ['single_select', 'multi_select'] },
-  { label: 'Media', fields: ['file_upload', 'signature'] },
-  { label: 'Layout', fields: ['section_divider', 'statement'] },
+const CATEGORIES: { labelKey: string; fields: FieldType[] }[] = [
+  { labelKey: 'field_type.cat.text', fields: ['short_text', 'long_text', 'email', 'number'] },
+  { labelKey: 'field_type.cat.date_time', fields: ['date', 'datetime'] },
+  { labelKey: 'field_type.cat.choice', fields: ['single_select', 'multi_select'] },
+  { labelKey: 'field_type.cat.media', fields: ['file_upload', 'signature'] },
+  { labelKey: 'field_type.cat.layout', fields: ['section_divider', 'statement'] },
 ]
 
-const FIELD_LABELS: Record<FieldType, string> = {
-  short_text: 'Short text',
-  long_text: 'Long text',
-  email: 'Email',
-  number: 'Number',
-  date: 'Date',
-  datetime: 'Date & time',
-  single_select: 'Single select',
-  multi_select: 'Multi select',
-  file_upload: 'File upload',
-  signature: 'Signature',
-  section_divider: 'Section divider',
-  statement: 'Statement',
+const FIELD_LABEL_KEYS: Record<FieldType, string> = {
+  short_text: 'field_type.short_text',
+  long_text: 'field_type.long_text',
+  email: 'field_type.email',
+  number: 'field_type.number',
+  date: 'field_type.date',
+  datetime: 'field_type.date_time',
+  single_select: 'field_type.single_select',
+  multi_select: 'field_type.multi_select',
+  file_upload: 'field_type.file_upload',
+  signature: 'field_type.signature',
+  section_divider: 'field_type.section_divider',
+  statement: 'field_type.statement',
 }
 
 export function FieldTypePicker({ onAdd }: FieldTypePickerProps) {
+  const t = useT()
   return (
     <div className="flex flex-col gap-5 py-4">
       {CATEGORIES.map((cat) => (
-        <div key={cat.label}>
-          <p className="label-meta px-4 mb-2">{cat.label}</p>
+        <div key={cat.labelKey}>
+          <p className="label-meta px-4 mb-2">{t(cat.labelKey as any)}</p>
           <div className="flex flex-col gap-0.5 px-2">
             {cat.fields.map((type) => (
               <button
@@ -74,7 +76,7 @@ export function FieldTypePicker({ onAdd }: FieldTypePickerProps) {
                 <span className="text-mid shrink-0 group-hover:text-blue transition-colors">
                   {FIELD_ICONS[type]}
                 </span>
-                <span className="font-light flex-1">{FIELD_LABELS[type]}</span>
+                <span className="font-light flex-1">{t(FIELD_LABEL_KEYS[type] as any)}</span>
                 <span className="opacity-0 group-hover:opacity-100 text-mid transition-opacity shrink-0">
                   <Plus size={11} />
                 </span>

@@ -5,8 +5,10 @@ import { useResponseStore } from '../store/responseStore'
 import { Button } from '../components/ui/Button'
 import { SectionDivider } from '../components/ui/SectionDivider'
 import { formatDateShort } from '../lib/utils'
+import { useT } from '../lib/i18n'
 
 export function HomePage() {
+  const t = useT()
   const navigate = useNavigate()
   const forms = useFormStore((s) => s.forms)
   const createForm = useFormStore((s) => s.createForm)
@@ -24,12 +26,12 @@ export function HomePage() {
         <div className="flex items-center gap-3">
           <span className="font-medium text-navy text-sm tracking-tight">OhMyForms</span>
           <span className="text-rule border-l border-rule pl-3 label-meta text-mid/50">
-            by Eternum
+            {t('home.byline')}
           </span>
         </div>
         <Button variant="primary" size="sm" onClick={handleCreate}>
           <Plus size={13} />
-          New form
+          {t('home.new_form')}
         </Button>
       </header>
 
@@ -52,13 +54,14 @@ export function HomePage() {
       {/* Footer tick */}
       <div className="tick-rule-sm w-full mt-auto" />
       <footer className="py-3 text-center border-t border-rule">
-        <span className="label-meta text-navy/25">OhMyForms · Eternum</span>
+        <span className="label-meta text-navy/25">{t('home.footer')}</span>
       </footer>
     </div>
   )
 }
 
 function WelcomeHero({ onCreate }: { onCreate: () => void }) {
+  const t = useT()
   return (
     <div className="py-20 flex flex-col gap-12">
       {/* Hero text */}
@@ -67,15 +70,14 @@ function WelcomeHero({ onCreate }: { onCreate: () => void }) {
 
         <div className="text-center flex flex-col gap-3">
           <h1 className="text-4xl font-medium text-navy tracking-tight leading-[1.15]">
-            Build forms that feel
+            {t('home.hero.heading_1')}
             <br />
             <em className="font-serif italic font-normal text-blue not-italic" style={{ fontStyle: 'italic' }}>
-              like documents.
+              {t('home.hero.heading_2')}
             </em>
           </h1>
           <p className="text-sm text-navy/50 font-light max-w-sm mx-auto leading-relaxed">
-            Professional forms, surveys, and onboarding flows.
-            Built for teams who care about the details.
+            {t('home.hero.subtitle')}
           </p>
         </div>
       </div>
@@ -87,18 +89,18 @@ function WelcomeHero({ onCreate }: { onCreate: () => void }) {
       <div className="grid grid-cols-3 gap-6">
         <FeatureItem
           icon={<Layers size={16} />}
-          title="12 field types"
-          desc="Text, selects, file upload, signatures, and layout blocks."
+          title={t('home.feature.12types')}
+          desc={t('home.feature.12types.desc')}
         />
         <FeatureItem
           icon={<GitBranch size={16} />}
-          title="Conditional logic"
-          desc="Show or hide fields based on any previous answer."
+          title={t('home.feature.conditional')}
+          desc={t('home.feature.conditional.desc')}
         />
         <FeatureItem
           icon={<Table2 size={16} />}
-          title="Responses table"
-          desc="Browse, search, and export submissions to CSV."
+          title={t('home.feature.responses')}
+          desc={t('home.feature.responses.desc')}
         />
       </div>
 
@@ -107,20 +109,20 @@ function WelcomeHero({ onCreate }: { onCreate: () => void }) {
 
       {/* CTA */}
       <div className="flex flex-col items-center gap-4">
-        <SectionDivider label="Get started" />
+        <SectionDivider label={t('home.get_started')} />
         <div className="flex flex-col items-center gap-2 pt-2">
           <button
             type="button"
             onClick={onCreate}
             className="group flex items-center gap-2 text-sm text-blue hover:text-navy transition-colors font-normal"
           >
-            Create your first form
+            {t('home.create_first')}
             <ArrowRight
               size={14}
               className="transition-transform group-hover:translate-x-0.5"
             />
           </button>
-          <p className="text-[11px] text-navy/30 label-meta">No account required</p>
+          <p className="text-[11px] text-navy/30 label-meta">{t('home.no_account')}</p>
         </div>
       </div>
     </div>
@@ -158,18 +160,19 @@ function FormsList({
   onNavigate: ReturnType<typeof useNavigate>
   onCreate: () => void
 }) {
+  const t = useT()
   return (
     <div className="py-12 flex flex-col gap-8">
       {/* Section header */}
       <div className="flex items-center gap-4">
-        <SectionDivider label="Forms" className="flex-1" />
+        <SectionDivider label={t('home.forms_section')} className="flex-1" />
         <button
           type="button"
           onClick={onCreate}
           className="flex items-center gap-1.5 label-meta text-mid hover:text-navy transition-colors shrink-0"
         >
           <Plus size={11} />
-          New
+          {t('home.forms_new')}
         </button>
       </div>
 
@@ -195,7 +198,9 @@ function FormsList({
                 <p className="font-normal text-navy text-sm truncate">{form.title}</p>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="label-meta text-navy/30">
-                    {form.fields.length} field{form.fields.length !== 1 ? 's' : ''}
+                    {form.fields.length === 1
+                      ? t('home.field_count').replace('{count}', String(form.fields.length))
+                      : t('home.field_count_plural').replace('{count}', String(form.fields.length))}
                   </span>
                   <span className="label-meta text-navy/20">·</span>
                   <span className="label-meta text-navy/30">
@@ -217,14 +222,14 @@ function FormsList({
                   variant="ghost"
                   onClick={() => onNavigate(`/responses/${form.id}`)}
                 >
-                  Responses
+                  {t('home.responses_btn')}
                 </Button>
                 <Button
                   size="sm"
                   variant="secondary"
                   onClick={() => onNavigate(`/builder/${form.id}`)}
                 >
-                  Edit
+                  {t('home.edit_btn')}
                 </Button>
               </div>
             </div>
@@ -242,7 +247,7 @@ function FormsList({
           className="group flex items-center gap-2 text-[12px] text-mid/60 hover:text-navy transition-colors label-meta"
         >
           <Plus size={11} />
-          New form
+          {t('home.new_form_bottom')}
         </button>
       </div>
     </div>
