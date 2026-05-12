@@ -1,11 +1,11 @@
-import { X } from 'lucide-react'
-import type { FormSchema } from '../../types/form'
-import { Input, Textarea } from '../ui/Input'
+import { X } from "lucide-react";
+import type { FormSchema } from "../../types/form";
+import { Input, Textarea } from "../ui/Input";
 
 interface FormSettingsPanelProps {
-  form: FormSchema
-  onChange: (updates: Partial<Omit<FormSchema, 'id' | 'createdAt'>>) => void
-  onClose: () => void
+  form: FormSchema;
+  onChange: (updates: Partial<Omit<FormSchema, "id" | "createdAt">>) => void;
+  onClose: () => void;
 }
 
 export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanelProps) {
@@ -27,7 +27,7 @@ export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanel
 
         <Textarea
           label="Description"
-          value={form.description ?? ''}
+          value={form.description ?? ""}
           rows={3}
           placeholder="Describe the purpose of this form"
           onChange={(e) => onChange({ description: e.target.value })}
@@ -41,7 +41,7 @@ export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanel
 
         <Textarea
           label="Success message"
-          value={form.successMessage ?? ''}
+          value={form.successMessage ?? ""}
           rows={2}
           placeholder="Thank you. Your response has been recorded."
           onChange={(e) => onChange({ successMessage: e.target.value })}
@@ -49,7 +49,7 @@ export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanel
 
         <Input
           label="Redirect URL (optional)"
-          value={form.redirectUrl ?? ''}
+          value={form.redirectUrl ?? ""}
           placeholder="https://example.com/thank-you"
           hint="If set, the user is redirected here after submission."
           onChange={(e) => onChange({ redirectUrl: e.target.value })}
@@ -69,5 +69,5 @@ export function FormSettingsPanel({ form, onChange, onClose }: FormSettingsPanel
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { HomePage } from './pages/HomePage'
-import { BuilderPage } from './pages/BuilderPage'
-import { PublicFormPage } from './pages/PublicFormPage'
-import { EmbedPage } from './pages/EmbedPage'
-import { ResponsesPage } from './pages/ResponsesPage'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HomePage } from "./pages/HomePage";
+import { BuilderPage } from "./pages/BuilderPage";
+import { PublicFormPage } from "./pages/PublicFormPage";
+import { EmbedPage } from "./pages/EmbedPage";
+import { ResponsesPage } from "./pages/ResponsesPage";
 
 export default function App() {
   return (
@@ -24,5 +24,5 @@ export default function App() {
         />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }

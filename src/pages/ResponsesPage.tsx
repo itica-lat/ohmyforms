@@ -1,23 +1,23 @@
-import { useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
-import { useFormStore } from '../store/formStore'
-import { useResponseStore } from '../store/responseStore'
-import { ResponseTable } from '../components/responses/ResponseTable'
+import { useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
+import { useFormStore } from "../store/formStore";
+import { useResponseStore } from "../store/responseStore";
+import { ResponseTable } from "../components/responses/ResponseTable";
 
 export function ResponsesPage() {
-  const { formId } = useParams<{ formId: string }>()
-  const form = useFormStore((s) => s.getForm(formId ?? ''))
-  const allResponses = useResponseStore((s) => s.responses)
-  const deleteResponse = useResponseStore((s) => s.deleteResponse)
+  const { formId } = useParams<{ formId: string }>();
+  const form = useFormStore((s) => s.getForm(formId ?? ""));
+  const allResponses = useResponseStore((s) => s.responses);
+  const deleteResponse = useResponseStore((s) => s.deleteResponse);
   const responses = useMemo(
     () =>
       allResponses
         .filter((r) => r.formId === formId)
         .sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : -1)),
     [allResponses, formId],
-  )
-  const clearResponses = useResponseStore((s) => s.clearResponses)
+  );
+  const clearResponses = useResponseStore((s) => s.clearResponses);
 
   if (!form) {
     return (
@@ -27,7 +27,7 @@ export function ResponsesPage() {
           Go home
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -55,5 +55,5 @@ export function ResponsesPage() {
         />
       </div>
     </div>
-  )
+  );
 }

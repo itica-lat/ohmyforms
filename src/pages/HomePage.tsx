@@ -1,20 +1,21 @@
-import { Plus, FileText, BarChart2, ArrowRight, Layers, GitBranch, Table2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import { useFormStore } from '../store/formStore'
-import { useResponseStore } from '../store/responseStore'
-import { Button } from '../components/ui/Button'
-import { SectionDivider } from '../components/ui/SectionDivider'
-import { formatDateShort } from '../lib/utils'
+import { Plus, FileText, BarChart2, ArrowRight, Layers, GitBranch, Table2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useFormStore } from "../store/formStore";
+import { useResponseStore } from "../store/responseStore";
+import { Button } from "../components/ui/Button";
+import { SectionDivider } from "../components/ui/SectionDivider";
+import { formatDateShort } from "../lib/utils";
+import { getAllBlocks } from "../types/form";
 
 export function HomePage() {
-  const navigate = useNavigate()
-  const forms = useFormStore((s) => s.forms)
-  const createForm = useFormStore((s) => s.createForm)
-  const getResponses = useResponseStore((s) => s.getResponses)
+  const navigate = useNavigate();
+  const forms = useFormStore((s) => s.forms);
+  const createForm = useFormStore((s) => s.createForm);
+  const getResponses = useResponseStore((s) => s.getResponses);
 
   function handleCreate() {
-    const form = createForm()
-    navigate(`/builder/${form.id}`)
+    const form = createForm();
+    navigate(`/builder/${form.id}`);
   }
 
   return (
@@ -55,7 +56,7 @@ export function HomePage() {
         <span className="label-meta text-navy/25">OhMyForms · Eternum</span>
       </footer>
     </div>
-  )
+  );
 }
 
 function WelcomeHero({ onCreate }: { onCreate: () => void }) {
@@ -69,13 +70,16 @@ function WelcomeHero({ onCreate }: { onCreate: () => void }) {
           <h1 className="text-4xl font-medium text-navy tracking-tight leading-[1.15]">
             Build forms that feel
             <br />
-            <em className="font-serif italic font-normal text-blue not-italic" style={{ fontStyle: 'italic' }}>
+            <em
+              className="font-serif italic font-normal text-blue not-italic"
+              style={{ fontStyle: "italic" }}
+            >
               like documents.
             </em>
           </h1>
           <p className="text-sm text-navy/50 font-light max-w-sm mx-auto leading-relaxed">
-            Professional forms, surveys, and onboarding flows.
-            Built for teams who care about the details.
+            Professional forms, surveys, and onboarding flows. Built for teams who care about the
+            details.
           </p>
         </div>
       </div>
@@ -115,16 +119,13 @@ function WelcomeHero({ onCreate }: { onCreate: () => void }) {
             className="group flex items-center gap-2 text-sm text-blue hover:text-navy transition-colors font-normal"
           >
             Create your first form
-            <ArrowRight
-              size={14}
-              className="transition-transform group-hover:translate-x-0.5"
-            />
+            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
           </button>
           <p className="text-[11px] text-navy/30 label-meta">No account required</p>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function FeatureItem({
@@ -132,9 +133,9 @@ function FeatureItem({
   title,
   desc,
 }: {
-  icon: React.ReactNode
-  title: string
-  desc: string
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
 }) {
   return (
     <div className="flex flex-col gap-2.5">
@@ -144,7 +145,7 @@ function FeatureItem({
       </div>
       <p className="text-[12px] text-navy/45 font-light leading-relaxed">{desc}</p>
     </div>
-  )
+  );
 }
 
 function FormsList({
@@ -153,10 +154,10 @@ function FormsList({
   onNavigate,
   onCreate,
 }: {
-  forms: ReturnType<typeof useFormStore.getState>['forms']
-  getResponses: ReturnType<typeof useResponseStore.getState>['getResponses']
-  onNavigate: ReturnType<typeof useNavigate>
-  onCreate: () => void
+  forms: ReturnType<typeof useFormStore.getState>["forms"];
+  getResponses: ReturnType<typeof useResponseStore.getState>["getResponses"];
+  onNavigate: ReturnType<typeof useNavigate>;
+  onCreate: () => void;
 }) {
   return (
     <div className="py-12 flex flex-col gap-8">
@@ -176,7 +177,7 @@ function FormsList({
       {/* Form cards */}
       <div className="flex flex-col gap-2">
         {forms.map((form) => {
-          const responseCount = getResponses(form.id).length
+          const responseCount = getResponses(form.id).length;
           return (
             <div
               key={form.id}
@@ -195,12 +196,10 @@ function FormsList({
                 <p className="font-normal text-navy text-sm truncate">{form.title}</p>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="label-meta text-navy/30">
-                    {form.fields.length} field{form.fields.length !== 1 ? 's' : ''}
+                    {getAllBlocks(form).length} block{getAllBlocks(form).length !== 1 ? "s" : ""}
                   </span>
                   <span className="label-meta text-navy/20">·</span>
-                  <span className="label-meta text-navy/30">
-                    {formatDateShort(form.updatedAt)}
-                  </span>
+                  <span className="label-meta text-navy/30">{formatDateShort(form.updatedAt)}</span>
                 </div>
               </div>
 
@@ -228,7 +227,7 @@ function FormsList({
                 </Button>
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -246,5 +245,5 @@ function FormsList({
         </button>
       </div>
     </div>
-  )
+  );
 }

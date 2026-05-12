@@ -1,65 +1,77 @@
-import type { Condition, ConditionOperator, FieldDefinition } from '../types/form'
+import type { Condition, ConditionOperator, FormBlock } from "../types/form";
 
 function evaluate(
   operator: ConditionOperator,
   fieldValue: unknown,
   conditionValue: unknown,
 ): boolean {
-  const strValue = fieldValue == null ? '' : String(fieldValue)
-  const strCondition = conditionValue == null ? '' : String(conditionValue)
+  const strValue = fieldValue == null ? "" : String(fieldValue);
+  const strCondition = conditionValue == null ? "" : String(conditionValue);
 
   switch (operator) {
-    case 'equals':
-      return strValue === strCondition
-    case 'not_equals':
-      return strValue !== strCondition
-    case 'contains':
-      return strValue.toLowerCase().includes(strCondition.toLowerCase())
-    case 'is_empty':
-      return strValue.trim() === '' || fieldValue == null
-    case 'is_not_empty':
-      return strValue.trim() !== '' && fieldValue != null
+    case "equals":
+      return strValue === strCondition;
+    case "not_equals":
+      return strValue !== strCondition;
+    case "contains":
+      return strValue.toLowerCase().includes(strCondition.toLowerCase());
+    case "is_empty":
+      return strValue.trim() === "" || fieldValue == null;
+    case "is_not_empty":
+      return strValue.trim() !== "" && fieldValue != null;
     default:
-      return true
+      return true;
   }
 }
 
-export function isFieldVisible(
-  field: FieldDefinition,
-  values: Record<string, unknown>,
-): boolean {
-  if (!field.conditions || field.conditions.length === 0) return true
+function getBlockConditions(block: FormBlock): Condition[] | undefined {
+  if (block.type === "banner" || block.type === "explainer") return undefined;
+  return block.conditions;
+}
 
-  for (const condition of field.conditions) {
-    const fieldValue = values[condition.if.fieldId]
-    const passes = evaluate(condition.if.operator, fieldValue, condition.if.value)
+export function isBlockVisible(block: FormBlock, values: Record<string, unknown>): boolean {
+  const conditions = getBlockConditions(block);
+  if (!conditions || conditions.length === 0) return true;
 
-    if (passes && condition.action === 'hide') return false
-    if (passes && condition.action === 'show') return true
+  for (const condition of conditions) {
+    const fieldValue = values[condition.if.fieldId];
+    const passes = evaluate(condition.if.operator, fieldValue, condition.if.value);
+
+    if (passes && condition.action === "hide") return false;
+    if (passes && condition.action === "show") return true;
   }
 
-  // If all conditions have action 'show' and none passed, hide the field
-  const hasShowConditions = field.conditions.some((c) => c.action === 'show')
-  if (hasShowConditions) return false
+  const hasShowConditions = conditions.some((c) => c.action === "show");
+  if (hasShowConditions) return false;
 
-  return true
+  return true;
+}
+
+export function isFieldVisible(block: FormBlock, values: Record<string, unknown>): boolean {
+  return isBlockVisible(block, values);
+}
+
+export function getVisibleBlocks(
+  blocks: FormBlock[],
+  values: Record<string, unknown>,
+): FormBlock[] {
+  return blocks.filter((b) => isBlockVisible(b, values));
 }
 
 export function getVisibleFields(
-  fields: FieldDefinition[],
+  blocks: FormBlock[],
   values: Record<string, unknown>,
-): FieldDefinition[] {
-  return fields.filter((f) => isFieldVisible(f, values))
+): FormBlock[] {
+  return getVisibleBlocks(blocks, values);
 }
 
 export function evaluateConditions(
   conditions: Condition[],
   values: Record<string, unknown>,
 ): boolean {
-  if (!conditions || conditions.length === 0) return true
-  // Use the first condition as the primary rule
-  const condition = conditions[0]
-  if (!condition) return true
-  const fieldValue = values[condition.if.fieldId]
-  return evaluate(condition.if.operator, fieldValue, condition.if.value)
+  if (!conditions || conditions.length === 0) return true;
+  const condition = conditions[0];
+  if (!condition) return true;
+  const fieldValue = values[condition.if.fieldId];
+  return evaluate(condition.if.operator, fieldValue, condition.if.value);
 }

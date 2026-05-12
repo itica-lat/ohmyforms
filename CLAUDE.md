@@ -34,13 +34,13 @@ src/
 
 ## Routes
 
-| Path | Component | Purpose |
-|---|---|---|
-| `/` | `HomePage` | List all forms, create/delete |
-| `/builder/:formId` | `BuilderPage` | Drag-drop editor |
-| `/form/:formId` | `PublicFormPage` | Public respondent view |
-| `/embed/:formId` | `EmbedPage` | Iframe-embeddable view |
-| `/responses/:formId` | `ResponsesPage` | Response table |
+| Path                 | Component        | Purpose                       |
+| -------------------- | ---------------- | ----------------------------- |
+| `/`                  | `HomePage`       | List all forms, create/delete |
+| `/builder/:formId`   | `BuilderPage`    | Drag-drop editor              |
+| `/form/:formId`      | `PublicFormPage` | Public respondent view        |
+| `/embed/:formId`     | `EmbedPage`      | Iframe-embeddable view        |
+| `/responses/:formId` | `ResponsesPage`  | Response table                |
 
 ## localStorage keys
 

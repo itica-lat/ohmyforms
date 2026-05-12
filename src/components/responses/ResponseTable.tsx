@@ -1,54 +1,63 @@
-import { useState } from 'react'
-import { Download, Trash2, Search } from 'lucide-react'
-import type { FormSchema, FormResponse } from '../../types/form'
-import { FIELD_TYPE_META } from '../../types/form'
-import { formatDate, download, toCSV } from '../../lib/utils'
-import { Button } from '../ui/Button'
+import { useState } from "react";
+import { Download, Trash2, Search } from "lucide-react";
+import type { FormSchema, FormResponse, FieldDefinition, RatingBlock } from "../../types/form";
+import { getDataBlocks, isFieldBlock, FIELD_TYPE_META } from "../../types/form";
+import { formatDate, download, toCSV } from "../../lib/utils";
+import { Button } from "../ui/Button";
 
 interface ResponseTableProps {
-  form: FormSchema
-  responses: FormResponse[]
-  onDelete: (id: string) => void
-  onClear: () => void
+  form: FormSchema;
+  responses: FormResponse[];
+  onDelete: (id: string) => void;
+  onClear: () => void;
 }
 
-export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTableProps) {
-  const [search, setSearch] = useState('')
-  const [sortAsc, setSortAsc] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+type DataBlock = FieldDefinition | RatingBlock;
 
-  const dataFields = form.fields.filter(
-    (f) => FIELD_TYPE_META[f.type].hasValue,
-  )
+export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTableProps) {
+  const [search, setSearch] = useState("");
+  const [sortAsc, setSortAsc] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const dataBlocks = getDataBlocks(form).filter((b) => {
+    if (isFieldBlock(b)) return FIELD_TYPE_META[b.type].hasValue;
+    return true;
+  }) as DataBlock[];
 
   const filtered = responses
     .filter((r) => {
-      if (!search.trim()) return true
-      const searchLower = search.toLowerCase()
+      if (!search.trim()) return true;
+      const searchLower = search.toLowerCase();
       return Object.values(r.data).some((v) =>
-        String(v ?? '').toLowerCase().includes(searchLower),
-      )
+        String(v ?? "")
+          .toLowerCase()
+          .includes(searchLower),
+      );
     })
     .sort((a, b) => {
-      const cmp = a.submittedAt.localeCompare(b.submittedAt)
-      return sortAsc ? cmp : -cmp
-    })
+      const cmp = a.submittedAt.localeCompare(b.submittedAt);
+      return sortAsc ? cmp : -cmp;
+    });
 
-  function exportCSV() {
-    const headers = ['Submitted at', ...dataFields.map((f) => f.label)]
-    const rows = responses.map((r) => ({
-      'Submitted at': r.submittedAt,
-      ...Object.fromEntries(
-        dataFields.map((f) => {
-          const val = r.data[f.id]
-          return [f.label, Array.isArray(val) ? val.join(', ') : String(val ?? '')]
-        }),
-      ),
-    }))
-    download(toCSV(rows, headers), `${form.title}-responses.csv`, 'text/csv')
+  function getLabel(b: DataBlock): string {
+    return isFieldBlock(b) ? b.label : b.label;
   }
 
-  const selected = selectedId ? responses.find((r) => r.id === selectedId) : null
+  function exportCSV() {
+    const headers = ["Submitted at", ...dataBlocks.map(getLabel)];
+    const rows = responses.map((r) => ({
+      "Submitted at": r.submittedAt,
+      ...Object.fromEntries(
+        dataBlocks.map((b) => {
+          const val = r.data[b.id];
+          return [getLabel(b), Array.isArray(val) ? val.join(", ") : String(val ?? "")];
+        }),
+      ),
+    }));
+    download(toCSV(rows, headers), `${form.title}-responses.csv`, "text/csv");
+  }
+
+  const selected = selectedId ? responses.find((r) => r.id === selectedId) : null;
 
   if (responses.length === 0) {
     return (
@@ -58,7 +67,7 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
           Share the form link to start collecting
         </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -101,11 +110,14 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
                   className="px-6 py-3 text-left label-meta text-navy/50 cursor-pointer hover:text-navy whitespace-nowrap"
                   onClick={() => setSortAsc(!sortAsc)}
                 >
-                  Submitted {sortAsc ? '↑' : '↓'}
+                  Submitted {sortAsc ? "↑" : "↓"}
                 </th>
-                {dataFields.slice(0, 5).map((f) => (
-                  <th key={f.id} className="px-4 py-3 text-left label-meta text-navy/50 whitespace-nowrap">
-                    {f.label}
+                {dataBlocks.slice(0, 5).map((b) => (
+                  <th
+                    key={b.id}
+                    className="px-4 py-3 text-left label-meta text-navy/50 whitespace-nowrap"
+                  >
+                    {getLabel(b)}
                   </th>
                 ))}
                 <th className="px-4 py-3 w-10" />
@@ -117,28 +129,28 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
                   key={r.id}
                   onClick={() => setSelectedId(selectedId === r.id ? null : r.id)}
                   className={[
-                    'border-b border-[rgba(73,136,196,0.08)] cursor-pointer transition-colors',
-                    selectedId === r.id ? 'bg-sky/20' : 'hover:bg-sky/10',
-                  ].join(' ')}
+                    "border-b border-[rgba(73,136,196,0.08)] cursor-pointer transition-colors",
+                    selectedId === r.id ? "bg-sky/20" : "hover:bg-sky/10",
+                  ].join(" ")}
                 >
                   <td className="px-6 py-3 text-navy/60 font-light whitespace-nowrap text-[12px]">
                     {formatDate(r.submittedAt)}
                   </td>
-                  {dataFields.slice(0, 5).map((f) => {
-                    const val = r.data[f.id]
-                    const display = Array.isArray(val) ? val.join(', ') : String(val ?? '')
+                  {dataBlocks.slice(0, 5).map((b) => {
+                    const val = r.data[b.id];
+                    const display = Array.isArray(val) ? val.join(", ") : String(val ?? "");
                     return (
-                      <td key={f.id} className="px-4 py-3 text-navy font-light max-w-[180px]">
-                        <span className="block truncate">{display || '—'}</span>
+                      <td key={b.id} className="px-4 py-3 text-navy font-light max-w-45">
+                        <span className="block truncate">{display || "—"}</span>
                       </td>
-                    )
+                    );
                   })}
                   <td className="px-4 py-3">
                     <button
                       type="button"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        onDelete(r.id)
+                        e.stopPropagation();
+                        onDelete(r.id);
                       }}
                       className="text-mid/50 hover:text-red-500 transition-colors"
                     >
@@ -155,28 +167,28 @@ export function ResponseTable({ form, responses, onDelete, onClear }: ResponseTa
       {selected && (
         <ResponseDetail
           response={selected}
-          dataFields={dataFields}
+          dataBlocks={dataBlocks}
           onClose={() => setSelectedId(null)}
           onDelete={() => {
-            onDelete(selected.id)
-            setSelectedId(null)
+            onDelete(selected.id);
+            setSelectedId(null);
           }}
         />
       )}
     </div>
-  )
+  );
 }
 
 function ResponseDetail({
   response,
-  dataFields,
+  dataBlocks,
   onClose,
   onDelete,
 }: {
-  response: FormResponse
-  dataFields: FormSchema['fields']
-  onClose: () => void
-  onDelete: () => void
+  response: FormResponse;
+  dataBlocks: DataBlock[];
+  onClose: () => void;
+  onDelete: () => void;
 }) {
   return (
     <div className="w-80 border-l border-[rgba(73,136,196,0.15)] flex flex-col shrink-0">
@@ -191,23 +203,23 @@ function ResponseDetail({
           <p className="label-meta mb-1">Submitted</p>
           <p className="text-sm text-navy font-light">{formatDate(response.submittedAt)}</p>
         </div>
-        {dataFields.map((f) => {
-          const val = response.data[f.id]
-          const display = Array.isArray(val) ? val.join(', ') : String(val ?? '')
-          if (f.type === 'signature' && display.startsWith('data:')) {
+        {dataBlocks.map((b) => {
+          const val = response.data[b.id];
+          const display = Array.isArray(val) ? val.join(", ") : String(val ?? "");
+          if (isFieldBlock(b) && b.type === "signature" && display.startsWith("data:")) {
             return (
-              <div key={f.id}>
-                <p className="label-meta mb-1">{f.label}</p>
+              <div key={b.id}>
+                <p className="label-meta mb-1">{b.label}</p>
                 <img src={display} alt="Signature" className="w-full rounded border border-rule" />
               </div>
-            )
+            );
           }
           return (
-            <div key={f.id}>
-              <p className="label-meta mb-1">{f.label}</p>
-              <p className="text-sm text-navy font-light break-words">{display || '—'}</p>
+            <div key={b.id}>
+              <p className="label-meta mb-1">{b.label}</p>
+              <p className="text-sm text-navy font-light wrap-break-word">{display || "—"}</p>
             </div>
-          )
+          );
         })}
       </div>
       <div className="p-5 border-t border-[rgba(73,136,196,0.15)]">
@@ -217,5 +229,5 @@ function ResponseDetail({
         </Button>
       </div>
     </div>
-  )
+  );
 }
