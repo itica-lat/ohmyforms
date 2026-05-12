@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   DndContext,
@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { useFormStore } from "../store/formStore";
 import type { AddableBlockType } from "../store/formStore";
-import { useResponseStore } from "../store/responseStore";
 import type { FormBlock } from "../types/form";
 import { FieldTypePicker } from "../components/builder/FieldTypePicker";
 import { FieldCard } from "../components/builder/FieldCard";
@@ -33,6 +32,7 @@ import { FormBrandingPanel } from "../components/builder/FormBrandingPanel";
 import { FormEmbed } from "../components/renderer/FormEmbed";
 import { ResponseTable } from "../components/responses/ResponseTable";
 import { Button } from "../components/ui/Button";
+import { api } from "../lib/api";
 
 type Tab = "build" | "preview" | "responses" | "share";
 type RightPanel = "block" | "form" | "branding" | null;
@@ -51,16 +51,8 @@ export function BuilderPage() {
   const reorderBlocks = useFormStore((s) => s.reorderBlocks);
   const duplicateBlock = useFormStore((s) => s.duplicateBlock);
 
-  const allResponses = useResponseStore((s) => s.responses);
-  const deleteResponse = useResponseStore((s) => s.deleteResponse);
-  const clearResponses = useResponseStore((s) => s.clearResponses);
-  const responses = useMemo(
-    () =>
-      allResponses
-        .filter((r) => r.formId === formId)
-        .sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : -1)),
-    [allResponses, formId],
-  );
+  const [responses, setResponses] = useState<any[]>([]);
+  const [loadingResponses, setLoadingResponses] = useState(false);
 
   const [tab, setTab] = useState<Tab>("build");
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -86,6 +78,48 @@ export function BuilderPage() {
 
   const allBlocksInForm: FormBlock[] = form?.sections.flatMap((s) => s.blocks) ?? [];
 
+  const [loadingFromApi, setLoadingFromApi] = useState(false);
+
+  // Fetch form from API if not in local store
+  useEffect(() => {
+    if (form || !formId) return;
+    setLoadingFromApi(true);
+    api.getForm(formId)
+      .then((f) => {
+        // Directly insert into zustand store (createForm generates new ID, updateForm only updates existing)
+        useFormStore.setState((s) => ({
+          forms: [...s.forms.filter((x) => x.id !== f.id), f],
+        }));
+      })
+      .catch(() => {
+        // Form genuinely not found; component shows "not found" below
+      })
+      .finally(() => setLoadingFromApi(false));
+  }, [form, formId]);
+
+  // Load responses from API when switching to responses tab
+  useEffect(() => {
+    if (tab === "responses" && formId) {
+      setLoadingResponses(true);
+      api.getResponses(formId)
+        .then(setResponses)
+        .catch(() => setResponses([]))
+        .finally(() => setLoadingResponses(false));
+    }
+  }, [tab, formId]);
+
+  async function handleDeleteResponse(responseId: string) {
+    if (!formId) return;
+    await api.deleteResponse(formId, responseId);
+    setResponses((prev) => prev.filter((r) => r.id !== responseId));
+  }
+
+  async function handleClearResponses() {
+    if (!formId) return;
+    await api.clearResponses(formId);
+    setResponses([]);
+  }
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       if (!form || !formId || !activeSectionId) return;
@@ -101,6 +135,13 @@ export function BuilderPage() {
   );
 
   if (!form) {
+    if (loadingFromApi) {
+      return (
+        <div className="flex items-center justify-center h-svh">
+          <p className="text-navy/40 font-light">Loading...</p>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col items-center justify-center h-svh text-navy/40">
         <p>Form not found.</p>
@@ -456,12 +497,18 @@ export function BuilderPage() {
 
           {tab === "responses" && (
             <div className="flex-1 overflow-hidden">
+              {loadingResponses ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-navy/40 font-light text-sm">Loading responses...</p>
+                </div>
+              ) : (
               <ResponseTable
                 form={form}
                 responses={responses}
-                onDelete={deleteResponse}
-                onClear={() => clearResponses(form.id)}
+                onDelete={handleDeleteResponse}
+                onClear={handleClearResponses}
               />
+              )}
             </div>
           )}
 
