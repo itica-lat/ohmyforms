@@ -1,21 +1,44 @@
-import { Plus, FileText, BarChart2, ArrowRight, Layers, GitBranch, Table2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, FileText, ArrowRight, Layers, GitBranch, Table2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useFormStore } from "../store/formStore";
-import { useResponseStore } from "../store/responseStore";
 import { Button } from "../components/ui/Button";
 import { SectionDivider } from "../components/ui/SectionDivider";
 import { formatDateShort } from "../lib/utils";
+import { api } from "../lib/api";
+import type { FormSchema } from "../types/form";
 import { getAllBlocks } from "../types/form";
 
 export function HomePage() {
   const navigate = useNavigate();
-  const forms = useFormStore((s) => s.forms);
-  const createForm = useFormStore((s) => s.createForm);
-  const getResponses = useResponseStore((s) => s.getResponses);
+  const [forms, setForms] = useState<FormSchema[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
 
-  function handleCreate() {
-    const form = createForm();
-    navigate(`/builder/${form.id}`);
+  async function loadForms() {
+    setLoading(true);
+    try {
+      const list = await api.listForms();
+      setForms(list);
+    } catch {
+      // silently fail, forms will be empty
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadForms();
+  }, []);
+
+  async function handleCreate() {
+    setCreating(true);
+    try {
+      const form = await api.createForm({ title: "Untitled form" });
+      navigate(`/builder/${form.id}`);
+    } catch {
+      // fallback: create locally
+      setCreating(false);
+    }
   }
 
   return (
@@ -28,7 +51,7 @@ export function HomePage() {
             by Eternum
           </span>
         </div>
-        <Button variant="primary" size="sm" onClick={handleCreate}>
+        <Button variant="primary" size="sm" onClick={handleCreate} disabled={creating}>
           <Plus size={13} />
           New form
         </Button>
@@ -38,12 +61,15 @@ export function HomePage() {
       <div className="tick-rule w-full" />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-8">
-        {forms.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-24">
+            <Loader2 size={20} className="text-mid/40 animate-spin" />
+          </div>
+        ) : forms.length === 0 ? (
           <WelcomeHero onCreate={handleCreate} />
         ) : (
           <FormsList
-            forms={[...forms].reverse()}
-            getResponses={getResponses}
+            forms={[...forms]}
             onNavigate={navigate}
             onCreate={handleCreate}
           />
@@ -150,12 +176,10 @@ function FeatureItem({
 
 function FormsList({
   forms,
-  getResponses,
   onNavigate,
   onCreate,
 }: {
-  forms: ReturnType<typeof useFormStore.getState>["forms"];
-  getResponses: ReturnType<typeof useResponseStore.getState>["getResponses"];
+  forms: FormSchema[];
   onNavigate: ReturnType<typeof useNavigate>;
   onCreate: () => void;
 }) {
@@ -177,7 +201,7 @@ function FormsList({
       {/* Form cards */}
       <div className="flex flex-col gap-2">
         {forms.map((form) => {
-          const responseCount = getResponses(form.id).length;
+          const blockCount = getAllBlocks(form).length;
           return (
             <div
               key={form.id}
@@ -196,17 +220,11 @@ function FormsList({
                 <p className="font-normal text-navy text-sm truncate">{form.title}</p>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="label-meta text-navy/30">
-                    {getAllBlocks(form).length} block{getAllBlocks(form).length !== 1 ? "s" : ""}
+                    {blockCount} block{blockCount !== 1 ? "s" : ""}
                   </span>
                   <span className="label-meta text-navy/20">·</span>
                   <span className="label-meta text-navy/30">{formatDateShort(form.updatedAt)}</span>
                 </div>
-              </div>
-
-              {/* Response count */}
-              <div className="flex items-center gap-1 text-mid/50 shrink-0 mr-1">
-                <BarChart2 size={12} />
-                <span className="label-meta text-navy/30">{responseCount}</span>
               </div>
 
               {/* Actions — visible on hover */}

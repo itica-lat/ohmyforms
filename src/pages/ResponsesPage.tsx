@@ -1,23 +1,47 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { useFormStore } from "../store/formStore";
-import { useResponseStore } from "../store/responseStore";
+import { api } from "../lib/api";
+import type { FormSchema, FormResponse } from "../types/form";
 import { ResponseTable } from "../components/responses/ResponseTable";
 
 export function ResponsesPage() {
   const { formId } = useParams<{ formId: string }>();
-  const form = useFormStore((s) => s.getForm(formId ?? ""));
-  const allResponses = useResponseStore((s) => s.responses);
-  const deleteResponse = useResponseStore((s) => s.deleteResponse);
-  const responses = useMemo(
-    () =>
-      allResponses
-        .filter((r) => r.formId === formId)
-        .sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : -1)),
-    [allResponses, formId],
-  );
-  const clearResponses = useResponseStore((s) => s.clearResponses);
+  const [form, setForm] = useState<FormSchema | null>(null);
+  const [responses, setResponses] = useState<FormResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!formId) return;
+    setLoading(true);
+    Promise.all([api.getForm(formId), api.getResponses(formId)])
+      .then(([f, r]) => {
+        setForm(f);
+        setResponses(r);
+      })
+      .catch(() => setForm(null))
+      .finally(() => setLoading(false));
+  }, [formId]);
+
+  async function handleDelete(responseId: string) {
+    if (!formId) return;
+    await api.deleteResponse(formId, responseId);
+    setResponses((prev) => prev.filter((r) => r.id !== responseId));
+  }
+
+  async function handleClear() {
+    if (!formId) return;
+    await api.clearResponses(formId);
+    setResponses([]);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-svh">
+        <p className="text-navy/40 font-light text-sm">Loading...</p>
+      </div>
+    );
+  }
 
   if (!form) {
     return (
@@ -50,8 +74,8 @@ export function ResponsesPage() {
         <ResponseTable
           form={form}
           responses={responses}
-          onDelete={deleteResponse}
-          onClear={() => clearResponses(form.id)}
+          onDelete={handleDelete}
+          onClear={handleClear}
         />
       </div>
     </div>

@@ -1,0 +1,16 @@
+[Unit]
+Description=OhMyForms API Server
+After=network.target
+
+[Service]
+Type=simple
+User=hermes
+WorkingDirectory=/home/hermes/repos/ohmy-forms/api
+ExecStart=/usr/local/bin/bun run src/index.ts
+Restart=always
+RestartSec=3
+Environment=DATA_DIR=/home/hermes/srv-data/ohmyforms
+Environment=PORT=3002
+
+[Install]
+WantedBy=multi-user.target

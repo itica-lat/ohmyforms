@@ -4,7 +4,7 @@ import type { FormSchema, FormBlock } from "../../types/form";
 import { isDataBlock } from "../../types/form";
 import { getVisibleBlocks } from "../../lib/conditionalEngine";
 import { FieldRenderer } from "./FieldRenderer";
-import { useResponseStore } from "../../store/responseStore";
+import { api } from "../../lib/api";
 
 interface FormEmbedProps {
   form: FormSchema;
@@ -24,10 +24,11 @@ function getTitleClass(style: string): string {
 }
 
 export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
-  const submit = useResponseStore((s) => s.submit);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const branding = form.branding;
   const accentColor = branding?.primaryColor ?? form.accentColor;
@@ -68,16 +69,23 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
 
     if (onSubmit) {
       onSubmit(values);
-    } else {
-      submit(form.id, values);
-    }
-
-    if (form.redirectUrl) {
-      window.location.href = form.redirectUrl;
       return;
     }
 
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+    api.submitResponse(form.id, values)
+      .then(() => {
+        if (form.redirectUrl) {
+          window.location.href = form.redirectUrl;
+          return;
+        }
+        setSubmitted(true);
+      })
+      .catch((e) => {
+        setSubmitError(e instanceof Error ? e.message : "Failed to submit");
+      })
+      .finally(() => setSubmitting(false));
   }
 
   if (submitted) {
@@ -177,11 +185,16 @@ export function FormEmbed({ form, onSubmit, preview = false }: FormEmbedProps) {
         {!preview && hasDataBlocks && (
           <button
             type="submit"
-            className="mt-8 px-6 py-2.5 rounded-input text-sm font-normal text-white transition-opacity hover:opacity-90"
+            disabled={submitting}
+            className="mt-8 px-6 py-2.5 rounded-input text-sm font-normal text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             style={{ backgroundColor: accentColor }}
           >
-            {form.submitLabel || "Submit"}
+            {submitting ? "Submitting..." : (form.submitLabel || "Submit")}
           </button>
+        )}
+
+        {submitError && (
+          <p className="mt-3 text-sm text-red-500">{submitError}</p>
         )}
 
         {preview && (

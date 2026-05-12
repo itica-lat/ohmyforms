@@ -1,0 +1,13 @@
+{
+  "name": "ohmyforms-api",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.4.2",
+    "elysia": "^1.4.28",
+    "zod": "^4.4.3"
+  }
+}

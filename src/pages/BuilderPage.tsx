@@ -131,7 +131,7 @@ export function BuilderPage() {
 
   function handleUpdateBlock(updates: Partial<FormBlock>) {
     if (!formId || !selectedBlockId) return;
-    const sec = form.sections.find((s) => s.blocks.some((b) => b.id === selectedBlockId));
+    const sec = form?.sections.find((s) => s.blocks.some((b) => b.id === selectedBlockId));
     if (!sec) return;
     updateBlock(formId, sec.id, selectedBlockId, updates);
   }
@@ -302,14 +302,15 @@ export function BuilderPage() {
                       {isExpanded && section.blocks.length > 0 && (
                         <div className="ml-5 mt-0.5 mb-1 flex flex-col gap-0.5">
                           {section.blocks.map((block) => {
+                            const b = block as any;
                             const label =
-                              "label" in block
-                                ? (block as { label: string }).label
-                                : block.type === "banner"
+                              "label" in b
+                                ? b.label
+                                : b.type === "banner"
                                   ? "Banner"
-                                  : block.type === "explainer"
+                                  : b.type === "explainer"
                                     ? "Explainer"
-                                    : block.type;
+                                    : b.type;
                             return (
                               <button
                                 key={block.id}
